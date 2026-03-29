@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studium — Plataforma de Estudos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0F14;
+    --surface: #161920;
+    --surface2: #1E2230;
+    --surface3: #262B3D;
+    --border: #2A2F45;
+    --accent: #6C63FF;
+    --accent2: #FF6584;
+    --accent3: #43E97B;
+    --accent4: #FFB347;
+    --text: #E8EAF2;
+    --text2: #8890B0;
+    --text3: #555D80;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
+  .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 0; flex-shrink: 0; position: relative; z-index: 10; }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; padding: 0 24px 32px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+  .logo span { display: block; font-size: 11px; font-weight: 400; font-family: 'DM Sans', sans-serif; color: var(--text3); -webkit-text-fill-color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .nav-section { padding: 0 12px; margin-bottom: 8px; }
+  .nav-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); padding: 0 12px; margin-bottom: 6px; font-weight: 500; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; font-size: 14px; color: var(--text2); font-weight: 400; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(255,101,132,0.1)); color: var(--text); border: 1px solid rgba(108,99,255,0.3); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: white; font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .sidebar-footer { margin-top: auto; padding: 16px 24px; border-top: 1px solid var(--border); }
+  .user-card { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; font-family: 'Syne', sans-serif; flex-shrink: 0; }
+  .user-info { overflow: hidden; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-course { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .main { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .page { display: none; padding: 32px 36px; min-height: 100vh; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  .btn { padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #8B80FF); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(108,99,255,0.35); }
+  .btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface3); color: var(--text); }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.purple::before { background: linear-gradient(90deg, var(--accent), #A08FFF); }
+  .stat-card.pink::before { background: linear-gradient(90deg, var(--accent2), #FF9EAF); }
+  .stat-card.green::before { background: linear-gradient(90deg, var(--accent3), #8FFFC5); }
+  .stat-card.orange::before { background: linear-gradient(90deg, var(--accent4), #FFCF80); }
+  .stat-icon { font-size: 22px; margin-bottom: 12px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+  .stat-label { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .calendar-wrapper { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+  .calendar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; max-width: 460px; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .cal-month { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+  .cal-btn { width: 32px; height: 32px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 14px; transition: all 0.2s; }
+  .cal-btn:hover { background: var(--surface3); color: var(--text); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-day-name { text-align: center; font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 1px; padding: 5px 0; text-transform: uppercase; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; position: relative; transition: all 0.15s; flex-direction: column; gap: 2px; }
+  .cal-day:hover:not(.empty) { background: var(--surface2); }
+  .cal-day.today { background: rgba(108,99,255,0.2); color: var(--accent); font-weight: 700; }
+  .cal-day.selected { background: var(--accent); color: white; font-weight: 700; }
+  .cal-day.empty { cursor: default; }
+  .cal-day.has-study::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent3); position: absolute; bottom: 3px; }
+  .cal-day.has-review::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent2); position: absolute; bottom: 3px; }
+  .cal-day.has-both::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: linear-gradient(90deg, var(--accent3), var(--accent2)); position: absolute; bottom: 3px; }
+  .events-panel { display: flex; flex-direction: column; gap: 16px; }
+  .event-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .form-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 11px; font-weight: 500; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select option { background: var(--surface2); }
+  .form-textarea { resize: vertical; min-height: 70px; }
+  .event-type-btns { display: flex; gap: 8px; }
+  .type-btn { flex: 1; padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .type-btn.active-study { background: rgba(67,233,123,0.15); border-color: var(--accent3); color: var(--accent3); }
+  .type-btn.active-review { background: rgba(255,101,132,0.15); border-color: var(--accent2); color: var(--accent2); }
+  .selected-date-info { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--accent); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .events-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; flex: 1; }
+  .event-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  .event-item:last-child { border-bottom: none; }
+  .event-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .event-dot.study { background: var(--accent3); box-shadow: 0 0 6px rgba(67,233,123,0.5); }
+  .event-dot.review { background: var(--accent2); box-shadow: 0 0 6px rgba(255,101,132,0.5); }
+  .event-content { flex: 1; }
+  .event-title { font-size: 13px; font-weight: 500; }
+  .event-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .event-tag { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+  .event-tag.study { background: rgba(67,233,123,0.15); color: var(--accent3); }
+  .event-tag.review { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .delete-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; }
+  .delete-btn:hover { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .subjects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .subject-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; border-left-width: 4px; }
+  .subject-card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-2px); }
+  .subject-emoji { font-size: 28px; margin-bottom: 12px; }
+  .subject-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .subject-code { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+  .subject-progress { margin-bottom: 12px; }
+  .progress-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .progress-bar { height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .subject-stats { display: flex; gap: 16px; }
+  .subject-stat { font-size: 12px; color: var(--text2); }
+  .subject-stat strong { color: var(--text); display: block; font-size: 16px; font-family: 'Syne', sans-serif; }
+  .tasks-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .task-column { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; min-height: 400px; }
+  .task-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .task-col-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .task-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; cursor: grab; transition: all 0.2s; animation: slideIn 0.3s ease; }
+  .task-item:hover { border-color: rgba(108,99,255,0.3); }
+  .task-item-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .task-item-meta { display: flex; align-items: center; justify-content: space-between; }
+  .task-item-subj { font-size: 11px; color: var(--text3); }
+  .priority-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .priority-high { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .priority-mid { background: rgba(255,179,71,0.15); color: var(--accent4); }
+  .priority-low { background: rgba(67,233,123,0.15); color: var(--accent3); }
+  .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; }
+  .timer-ring { position: relative; width: 260px; height: 260px; margin-bottom: 40px; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
+  .timer-ring-progress { fill: none; stroke: url(#timerGrad); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-display { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .timer-time { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .timer-mode { font-size: 12px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+  .timer-controls { display: flex; gap: 12px; margin-bottom: 32px; }
+  .timer-btn { width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .timer-btn.play { background: linear-gradient(135deg, var(--accent), #8B80FF); color: white; }
+  .timer-btn.play:hover { transform: scale(1.08); box-shadow: 0 8px 20px rgba(108,99,255,0.4); }
+  .timer-btn.reset { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .timer-btn.reset:hover { background: var(--surface3); color: var(--text); }
+  .timer-presets { display: flex; gap: 10px; margin-bottom: 32px; }
+  .preset-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .preset-btn.active { background: rgba(108,99,255,0.2); border-color: var(--accent); color: var(--accent); }
+  .preset-btn:hover { color: var(--text); }
+  .pomodoro-count { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 14px; }
+  .pomo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface3); transition: background 0.3s; }
+  .pomo-dot.done { background: var(--accent); }
+  .notes-layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; height: calc(100vh - 180px); }
+  .notes-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-y: auto; }
+  .notes-list::-webkit-scrollbar { width: 4px; }
+  .notes-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .note-list-item { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .note-list-item:hover { background: var(--surface2); }
+  .note-list-item.active { background: rgba(108,99,255,0.1); border-left: 2px solid var(--accent); }
+  .note-list-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .note-list-preview { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .note-list-date { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .note-editor { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+  .note-editor-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .note-title-input { flex: 1; background: none; border: none; color: var(--text); font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; outline: none; }
+  .note-title-input::placeholder { color: var(--text3); }
+  .note-body { flex: 1; padding: 20px; background: none; border: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.7; resize: none; outline: none; }
+  .note-body::placeholder { color: var(--text3); }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 440px; max-width: 90vw; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 13px; z-index: 200; animation: toastIn 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  @keyframes toastIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .no-events { text-align: center; padding: 30px 20px; color: var(--text3); font-size: 13px; }
+  .no-events .icon { font-size: 28px; margin-bottom: 8px; }
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .logo, .nav-label, .nav-item span, .nav-badge, .user-info { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .nav-icon { width: auto; }
+    .calendar-wrapper { grid-template-columns: 1fr; }
+    .tasks-container { grid-template-columns: 1fr; }
+    .notes-layout { grid-template-columns: 1fr; }
+    .page { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">Studium<span>Plataforma de estudos</span></div>
+  <div class="nav-section">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="nav-icon">⚡</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="navigate('calendar')"><span class="nav-icon">📅</span><span>Calendário</span><span class="nav-badge" id="cal-badge">0</span></div>
+    <div class="nav-item" onclick="navigate('subjects')"><span class="nav-icon">📚</span><span>Disciplinas</span></div>
+    <div class="nav-item" onclick="navigate('tasks')"><span class="nav-icon">✅</span><span>Tarefas</span><span class="nav-badge" id="task-badge">3</span></div>
+  </div>
+  <div class="nav-section" style="margin-top:8px">
+    <div class="nav-label">Ferramentas</div>
+    <div class="nav-item" onclick="navigate('timer')"><span class="nav-icon">⏱️</span><span>Pomodoro</span></div>
+    <div class="nav-item" onclick="navigate('notes')"><span class="nav-icon">📝</span><span>Anotações</span></div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">E</div>
+      <div class="user-info">
+        <div class="user-name">Estudante</div>
+        <div class="user-course">Direito</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div><div class="page-title">Bom dia! 👋</div><div class="page-subtitle">Aqui está seu resumo de hoje</div></div>
+      <button class="btn btn-primary" onclick="navigate('calendar')">+ Agendar Estudo</button>
+    </div>
+    <div class="cards-grid">
+      <div class="stat-card purple"><div class="stat-icon">📅</div><div class="stat-value" id="dash-events">0</div><div class="stat-label">Eventos agendados</div></div>
+      <div class="stat-card green"><div class="stat-icon">⏱️</div><div class="stat-value" id="dash-hours">0h</div><div class="stat-label">Horas esta semana</div></div>
+      <div class="stat-card pink"><div class="stat-icon">📝</div><div class="stat-value" id="dash-tasks">3</div><div class="stat-label">Tarefas pendentes</div></div>
+      <div class="stat-card orange"><div class="stat-icon">🎯</div><div class="stat-value">4</div><div class="stat-label">Disciplinas ativas</div></div>
+    </div>
+    <div class="section-header">
+      <div class="section-title">📅 Próximos Eventos</div>
+      <button class="btn btn-ghost" onclick="navigate('calendar')">Ver calendário →</button>
+    </div>
+    <div id="upcoming-events-list"><div class="no-events"><div class="icon">🗓️</div>Nenhum evento agendado. Vá ao Calendário para agendar seus estudos!</div></div>
+  </div>
+
+  <div class="page" id="page-calendar">
+    <div class="page-header">
+      <div><div class="page-title">Calendário de Estudos</div><div class="page-subtitle">Agende seus estudos e revisões por data</div></div>
+    </div>
+    <div class="calendar-wrapper">
+      <div class="calendar-card">
+        <div class="cal-nav">
+          <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+          <div class="cal-month" id="cal-title"></div>
+          <button class="cal-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="events-panel">
+        <div class="event-form">
+          <div class="form-title">✏️ Agendar Evento</div>
+          <div class="selected-date-info" id="selected-date-display">📅 Clique em um dia no calendário</div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Evento</label>
+            <div class="event-type-btns">
+              <button class="type-btn active-study" id="type-study" onclick="setType('study')">📖 Estudo</button>
+              <button class="type-btn" id="type-review" onclick="setType('review')">🔄 Revisão</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Disciplina</label>
+            <select class="form-select" id="event-subject">
+              <option value="">Selecione...</option>
+              <option value="Cálculo I">Cálculo I</option>
+              <option value="Algoritmos">Algoritmos</option>
+              <option value="Física II">Física II</option>
+              <option value="Banco de Dados">Banco de Dados</option>
+              <option value="Redes">Redes de Computadores</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn btn-ghost" style="flex:1;padding:8px 10px" onclick="showAddSubjectModal()">+ Adicionar</button>
+              <button class="btn btn-ghost" style="flex:1;padding:8px 10px" onclick="removeSelectedSubject()">- Remover</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tópico / Conteúdo</label>
+            <input class="form-input" id="event-topic" placeholder="ex: Artigos da Constituição..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horário</label>
+            <input class="form-input" type="time" id="event-time" value="08:00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notas (opcional)</label>
+            <textarea class="form-textarea" id="event-notes" placeholder="Materiais, capítulos..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telegram Chat ID (lembretes)</label>
+            <input class="form-input" id="telegram-chat-id" placeholder="ex: 123456789" />
+          </div>
+          <div class="form-group" style="display:flex;gap:8px">
+            <div style="flex:1">
+              <label class="form-label">Avisar antes</label>
+              <select class="form-select" id="telegram-lead-minutes">
+                <option value="5">5 min</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60">60 min</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:8px;min-width:220px">
+              <button class="btn btn-ghost" style="flex:1;padding:9px 10px" onclick="saveTelegramSettings()">Salvar</button>
+              <button class="btn btn-ghost" style="flex:1;padding:9px 10px" onclick="testTelegram()">Testar</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addEvent()">Agendar →</button>
+        </div>
+        <div class="events-list" id="events-list-container">
+          <div class="section-title" style="margin-bottom:12px">📋 Eventos do Dia</div>
+          <div id="day-events-list"><div class="no-events"><div class="icon">👆</div>Selecione um dia para ver os eventos</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-subjects">
+    <div class="page-header">
+      <div><div class="page-title">Minhas Disciplinas</div><div class="page-subtitle">Acompanhe seu progresso em cada matéria</div></div>
+      <button class="btn btn-primary" onclick="showAddSubjectModal()">+ Nova Disciplina</button>
+    </div>
+    <div class="subjects-grid" id="subjects-grid"></div>
+  </div>
+
+  <div class="page" id="page-tasks">
+    <div class="page-header">
+      <div><div class="page-title">Tarefas</div><div class="page-subtitle">Organize suas atividades com Kanban</div></div>
+      <button class="btn btn-primary" onclick="showAddTaskModal()">+ Nova Tarefa</button>
+    </div>
+    <div class="tasks-container">
+      <div class="task-column">
+        <div class="task-col-header"><div class="task-col-dot" style="background:var(--accent4)"></div>A Fazer <span style="color:var(--text3);font-weight:400;font-size:12px" id="todo-count"></span></div>
+        <div id="col-todo"></div>
+      </div>
+      <div class="task-column">
+        <div class="task-col-header"><div class="task-col-dot" style="background:var(--accent)"></div>Em Andamento <span style="color:var(--text3);font-weight:400;font-size:12px" id="doing-count"></span></div>
+        <div id="col-doing"></div>
+      </div>
+      <div class="task-column">
+        <div class="task-col-header"><div class="task-col-dot" style="background:var(--accent3)"></div>Concluído <span style="color:var(--text3);font-weight:400;font-size:12px" id="done-count"></span></div>
+        <div id="col-done"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-timer">
+    <div class="page-header">
+      <div><div class="page-title">Pomodoro Timer</div><div class="page-subtitle">Foco total com ciclos de estudo</div></div>
+    </div>
+    <div class="timer-center">
+      <div class="timer-presets">
+        <button class="preset-btn active" onclick="setPreset(25, this)">25 min</button>
+        <button class="preset-btn" onclick="setPreset(30, this)">30 min</button>
+        <button class="preset-btn" onclick="setPreset(45, this)">45 min</button>
+        <button class="preset-btn" onclick="setPreset(50, this)">50 min</button>
+      </div>
+      <div class="timer-ring">
+        <svg width="260" height="260" viewBox="0 0 260 260">
+          <defs>
+            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#6C63FF"/>
+              <stop offset="100%" style="stop-color:#FF6584"/>
+            </linearGradient>
+          </defs>
+          <circle class="timer-ring-bg" cx="130" cy="130" r="118"/>
+          <circle class="timer-ring-progress" id="timer-ring" cx="130" cy="130" r="118" stroke-dasharray="741.4" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timer-display">25:00</div>
+          <div class="timer-mode" id="timer-mode-label">FOCO</div>
+        </div>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn reset" onclick="resetTimer()">↺</button>
+        <button class="timer-btn play" id="play-btn" onclick="toggleTimer()">▶</button>
+        <button class="timer-btn reset" onclick="skipSession()">⏭</button>
+      </div>
+      <div class="pomodoro-count">
+        <span style="margin-right:4px;font-size:12px;color:var(--text3)">SESSÕES:</span>
+        <div class="pomo-dot" id="p1"></div>
+        <div class="pomo-dot" id="p2"></div>
+        <div class="pomo-dot" id="p3"></div>
+        <div class="pomo-dot" id="p4"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-notes">
+    <div class="page-header">
+      <div><div class="page-title">Anotações</div><div class="page-subtitle">Registre resumos e ideias</div></div>
+      <button class="btn btn-primary" onclick="newNote()">+ Nova Nota</button>
+    </div>
+    <div class="notes-layout">
+      <div class="notes-list" id="notes-list"></div>
+      <div class="note-editor">
+        <div class="note-editor-header">
+          <input class="note-title-input" id="note-title" placeholder="Título da anotação..." oninput="saveCurrentNote()"/>
+          <button class="btn btn-ghost" onclick="deleteCurrentNote()">🗑️</button>
+        </div>
+        <textarea class="note-body" id="note-body" placeholder="Comece a escrever..." oninput="saveCurrentNote()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="modal-overlay" id="modal-subject" style="display:none" onclick="closeModal('modal-subject')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">📚 Nova Disciplina</div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="subj-emoji" value="📖" maxlength="2" style="width:80px"/></div>
+    <div class="form-group"><label class="form-label">Nome da Disciplina</label><input class="form-input" id="subj-name" placeholder="ex: Direito Comercial"/></div>
+    <div class="form-group"><label class="form-label">Código</label><input class="form-input" id="subj-code" placeholder="ex: DIR401"/></div>
+    <div class="form-group">
+      <label class="form-label">Cor</label>
+      <select class="form-select" id="subj-color">
+        <option value="#6C63FF">Roxo</option>
+        <option value="#FF6584">Rosa</option>
+        <option value="#43E97B">Verde</option>
+        <option value="#FFB347">Laranja</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-subject')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addSubject()">Adicionar →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-task" style="display:none" onclick="closeModal('modal-task')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">✅ Nova Tarefa</div>
+    <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="task-title-input" placeholder="Descreva a tarefa..."/></div>
+    <div class="form-group">
+      <label class="form-label">Disciplina</label>
+      <select class="form-select" id="task-subject-input">
+        <option value="Cálculo I">Cálculo I</option>
+        <option value="Algoritmos">Algoritmos</option>
+        <option value="Física II">Física II</option>
+        <option value="Banco de Dados">Banco de Dados</option>
+        <option value="Geral">Geral</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prioridade</label>
+      <select class="form-select" id="task-priority-input">
+        <option value="high">Alta 🔴</option>
+        <option value="mid">Média 🟡</option>
+        <option value="low">Baixa 🟢</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-task')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addTask()">Criar Tarefa →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentPage = 'dashboard';
+let selectedDate = null;
+let selectedType = 'study';
+let calYear, calMonth;
+let events = JSON.parse(localStorage.getItem('studium_events') || '[]');
+let tasks = JSON.parse(localStorage.getItem('studium_tasks') || JSON.stringify([
+  { id: 1, title: 'Resolver lista 3 de Cálculo', subject: 'Cálculo I', priority: 'high', status: 'todo' },
+  { id: 2, title: 'Estudar ponteiros em C', subject: 'Algoritmos', priority: 'mid', status: 'doing' },
+  { id: 3, title: 'Resumo Leis de Kirchhoff', subject: 'Física II', priority: 'low', status: 'todo' }
+]));
+let subjects = JSON.parse(localStorage.getItem('studium_subjects') || JSON.stringify([
+  { id: 1, emoji: '∫', name: 'Cálculo I', code: 'MAT101', color: '#6C63FF', progress: 60, hours: 12, sessions: 8 },
+  { id: 2, emoji: '💻', name: 'Algoritmos', code: 'CC201', color: '#FF6584', progress: 45, hours: 9, sessions: 6 },
+  { id: 3, emoji: '⚡', name: 'Física II', code: 'FIS202', color: '#43E97B', progress: 30, hours: 6, sessions: 4 },
+  { id: 4, emoji: '🗃️', name: 'Banco de Dados', code: 'CC301', color: '#FFB347', progress: 75, hours: 15, sessions: 10 }
+]));
+let notes = JSON.parse(localStorage.getItem('studium_notes') || '[]');
+let currentNoteId = null;
+let timerInterval = null;
+let timerRunning = false;
+let timerSeconds = 25 * 60;
+let timerTotal = 25 * 60;
+let pomodoroCount = 0;
+let isBreak = false;
+let telegramChatId = localStorage.getItem('studium_telegram_chat_id') || '';
+let reminderLeadMinutes = parseInt(localStorage.getItem('studium_telegram_lead') || '30', 10);
+let reminderSent = JSON.parse(localStorage.getItem('studium_telegram_sent') || '{}');
+
+const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const dayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(page)) n.classList.add('active');
+  });
+  currentPage = page;
+  if (page === 'calendar') renderCalendar();
+  if (page === 'subjects') renderSubjects();
+  if (page === 'tasks') renderTasks();
+  if (page === 'notes') renderNotes();
+  if (page === 'dashboard') renderDashboard();
+}
+
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  document.getElementById('cal-title').textContent = months[calMonth] + ' ' + calYear;
+  grid.innerHTML = '';
+  dayNames.forEach(d => {
+    const dn = document.createElement('div');
+    dn.className = 'cal-day-name';
+    dn.textContent = d;
+    grid.appendChild(dn);
+  });
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const total = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  for (let i = 0; i < first; i++) {
+    const e = document.createElement('div');
+    e.className = 'cal-day empty';
+    grid.appendChild(e);
+  }
+  for (let d = 1; d <= total; d++) {
+    const el = document.createElement('div');
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvents = events.filter(e => e.date === dateStr);
+    const hasStudy = dayEvents.some(e => e.type === 'study');
+    const hasReview = dayEvents.some(e => e.type === 'review');
+    el.className = 'cal-day';
+    el.textContent = d;
+    if (today.getDate() === d && today.getMonth() === calMonth && today.getFullYear() === calYear) el.classList.add('today');
+    if (selectedDate === dateStr) el.classList.add('selected');
+    if (hasStudy && hasReview) el.classList.add('has-both');
+    else if (hasStudy) el.classList.add('has-study');
+    else if (hasReview) el.classList.add('has-review');
+    el.onclick = () => selectDate(dateStr, d);
+    grid.appendChild(el);
+  }
+}
+
+function selectDate(dateStr, d) {
+  selectedDate = dateStr;
+  const [y, m] = dateStr.split('-');
+  document.getElementById('selected-date-display').innerHTML = `📅 ${d} de ${months[parseInt(m)-1]} de ${y}`;
+  renderCalendar();
+  renderDayEvents();
+}
+
+function setType(t) {
+  selectedType = t;
+  document.getElementById('type-study').className = 'type-btn' + (t === 'study' ? ' active-study' : '');
+  document.getElementById('type-review').className = 'type-btn' + (t === 'review' ? ' active-review' : '');
+}
+
+function addEvent() {
+  if (!selectedDate) { showToast('⚠️ Selecione um dia no calendário'); return; }
+  const subject = document.getElementById('event-subject').value;
+  const topic = document.getElementById('event-topic').value.trim();
+  const time = document.getElementById('event-time').value;
+  const notes_val = document.getElementById('event-notes').value.trim();
+  if (!subject || !topic) { showToast('⚠️ Preencha disciplina e tópico'); return; }
+  events.push({ id: Date.now(), date: selectedDate, type: selectedType, subject, topic, time, notes: notes_val });
+  saveData();
+  renderCalendar();
+  renderDayEvents();
+  updateBadges();
+  updateDashboard();
+  document.getElementById('event-topic').value = '';
+  document.getElementById('event-notes').value = '';
+  showToast(selectedType === 'study' ? '📖 Estudo agendado!' : '🔄 Revisão agendada!');
+  checkTelegramReminders();
+}
+
+function saveTelegramState() {
+  localStorage.setItem('studium_telegram_chat_id', telegramChatId);
+  localStorage.setItem('studium_telegram_lead', String(reminderLeadMinutes));
+  localStorage.setItem('studium_telegram_sent', JSON.stringify(reminderSent));
+}
+
+function saveTelegramSettings(showFeedback = true) {
+  const chatInput = document.getElementById('telegram-chat-id');
+  const leadInput = document.getElementById('telegram-lead-minutes');
+  telegramChatId = chatInput ? chatInput.value.trim() : telegramChatId;
+  reminderLeadMinutes = leadInput ? parseInt(leadInput.value, 10) || 30 : reminderLeadMinutes;
+  saveTelegramState();
+  if (showFeedback) showToast('✅ Configuração do Telegram salva');
+}
+
+async function sendTelegramMessage(message, silent = false) {
+  if (!telegramChatId) {
+    if (!silent) showToast('⚠️ Informe o Chat ID do Telegram');
+    return false;
+  }
+
+  try {
+    const response = await fetch('/api/telegram-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId: telegramChatId, message })
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Falha no envio');
+    return true;
+  } catch (error) {
+    if (!silent) showToast('❌ Não foi possível enviar no Telegram');
+    return false;
+  }
+}
+
+async function testTelegram() {
+  saveTelegramSettings(false);
+  const ok = await sendTelegramMessage('✅ Teste de lembrete do Studium recebido com sucesso.');
+  if (ok) showToast('📨 Teste enviado para o Telegram');
+}
+
+async function checkTelegramReminders() {
+  if (!telegramChatId || !events.length) return;
+  const now = new Date();
+
+  for (const event of events) {
+    if (!event.date || !event.time) continue;
+    const eventDateTime = new Date(`${event.date}T${event.time}:00`);
+    if (Number.isNaN(eventDateTime.getTime())) continue;
+
+    const diffMinutes = Math.floor((eventDateTime.getTime() - now.getTime()) / 60000);
+    const reminderKey = `${event.id}-${reminderLeadMinutes}`;
+
+    if (diffMinutes >= 0 && diffMinutes <= reminderLeadMinutes && !reminderSent[reminderKey]) {
+      const [year, month, day] = event.date.split('-');
+      const label = event.type === 'review' ? 'Revisão' : 'Estudo';
+      const message = `⏰ Lembrete Studium\n${label} em ${diffMinutes} min\n${event.subject} - ${event.topic}\n${day}/${month}/${year} às ${event.time}`;
+      const sent = await sendTelegramMessage(message, true);
+      if (sent) {
+        reminderSent[reminderKey] = Date.now();
+      }
+    }
+  }
+
+  const activeIds = new Set(events.map(event => event.id));
+  Object.keys(reminderSent).forEach(key => {
+    const idPart = Number(String(key).split('-')[0]);
+    if (!activeIds.has(idPart)) delete reminderSent[key];
+  });
+  saveTelegramState();
+}
+
+function renderDayEvents() {
+  const container = document.getElementById('day-events-list');
+  if (!selectedDate) return;
+  const dayEvents = events.filter(e => e.date === selectedDate).sort((a,b) => a.time.localeCompare(b.time));
+  if (!dayEvents.length) { container.innerHTML = '<div class="no-events"><div class="icon">✨</div>Nenhum evento neste dia</div>'; return; }
+  container.innerHTML = dayEvents.map(ev => `
+    <div class="event-item">
+      <div class="event-dot ${ev.type}"></div>
+      <div class="event-content">
+        <div class="event-title">${ev.topic}</div>
+        <div class="event-meta">${ev.subject} · ${ev.time}${ev.notes ? ' · ' + ev.notes : ''}</div>
+      </div>
+      <span class="event-tag ${ev.type}">${ev.type === 'study' ? '📖 Estudo' : '🔄 Revisão'}</span>
+      <button class="delete-btn" onclick="deleteEvent(${ev.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteEvent(id) {
+  events = events.filter(e => e.id !== id);
+  saveData(); renderCalendar(); renderDayEvents(); updateBadges(); updateDashboard();
+  showToast('🗑️ Evento removido');
+}
+
+function renderSubjects() {
+  document.getElementById('subjects-grid').innerHTML = subjects.map(s => `
+    <div class="subject-card" style="border-left-color:${s.color}">
+      <div class="subject-emoji">${s.emoji}</div>
+      <div class="subject-name">${s.name}</div>
+      <div class="subject-code">${s.code}</div>
+      <div class="subject-progress">
+        <div class="progress-header"><span>Progresso</span><span>${s.progress}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${s.progress}%;background:${s.color}"></div></div>
+      </div>
+      <div class="subject-stats">
+        <div class="subject-stat"><strong>${s.hours}h</strong>Estudadas</div>
+        <div class="subject-stat"><strong>${s.sessions}</strong>Sessões</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAddSubjectModal() { document.getElementById('modal-subject').style.display = 'flex'; }
+
+function syncSubjectSelects() {
+  const eventSelect = document.getElementById('event-subject');
+  const taskSelect = document.getElementById('task-subject-input');
+  if (!eventSelect || !taskSelect) return;
+
+  const previousEventValue = eventSelect.value;
+  const previousTaskValue = taskSelect.value;
+
+  eventSelect.innerHTML = '';
+  const eventPlaceholder = document.createElement('option');
+  eventPlaceholder.value = '';
+  eventPlaceholder.textContent = 'Selecione...';
+  eventSelect.appendChild(eventPlaceholder);
+
+  subjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.value = subject.name;
+    option.textContent = subject.name;
+    eventSelect.appendChild(option);
+  });
+
+  const eventOther = document.createElement('option');
+  eventOther.value = 'Outro';
+  eventOther.textContent = 'Outro';
+  eventSelect.appendChild(eventOther);
+
+  taskSelect.innerHTML = '';
+  subjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.value = subject.name;
+    option.textContent = subject.name;
+    taskSelect.appendChild(option);
+  });
+
+  const taskGeneral = document.createElement('option');
+  taskGeneral.value = 'Geral';
+  taskGeneral.textContent = 'Geral';
+  taskSelect.appendChild(taskGeneral);
+
+  if ([...eventSelect.options].some(option => option.value === previousEventValue)) {
+    eventSelect.value = previousEventValue;
+  }
+
+  if ([...taskSelect.options].some(option => option.value === previousTaskValue)) {
+    taskSelect.value = previousTaskValue;
+  }
+}
+
+function removeSelectedSubject() {
+  const eventSelect = document.getElementById('event-subject');
+  const selectedName = eventSelect ? eventSelect.value : '';
+  if (!selectedName || selectedName === 'Outro') {
+    showToast('⚠️ Selecione uma disciplina válida para remover');
+    return;
+  }
+
+  const exists = subjects.some(subject => subject.name === selectedName);
+  if (!exists) {
+    showToast('⚠️ Disciplina não encontrada');
+    return;
+  }
+
+  if (!confirm(`Remover disciplina "${selectedName}"?`)) return;
+
+  subjects = subjects.filter(subject => subject.name !== selectedName);
+  tasks = tasks.map(task => task.subject === selectedName ? { ...task, subject: 'Geral' } : task);
+  events = events.map(event => event.subject === selectedName ? { ...event, subject: 'Outro' } : event);
+
+  saveData();
+  syncSubjectSelects();
+  renderSubjects();
+  renderTasks();
+  renderDayEvents();
+  updateDashboard();
+  showToast('🗑️ Disciplina removida');
+}
+
+function addSubject() {
+  const emoji = document.getElementById('subj-emoji').value || '📖';
+  const name = document.getElementById('subj-name').value.trim();
+  const code = document.getElementById('subj-code').value.trim();
+  const color = document.getElementById('subj-color').value;
+  if (!name) { showToast('⚠️ Digite o nome da disciplina'); return; }
+  if (subjects.some(subject => subject.name.toLowerCase() === name.toLowerCase())) {
+    showToast('⚠️ Essa disciplina já existe');
+    return;
+  }
+  subjects.push({ id: Date.now(), emoji, name, code, color, progress: 0, hours: 0, sessions: 0 });
+  saveData(); closeModal('modal-subject'); renderSubjects();
+  syncSubjectSelects();
+  showToast('📚 Disciplina adicionada!');
+  document.getElementById('subj-name').value = '';
+  document.getElementById('subj-code').value = '';
+}
+
+function renderTasks() {
+  ['todo','doing','done'].forEach(status => {
+    const col = document.getElementById('col-' + status);
+    const filtered = tasks.filter(t => t.status === status);
+    document.getElementById(status + '-count').textContent = `(${filtered.length})`;
+    col.innerHTML = filtered.map(t => `
+      <div class="task-item">
+        <div class="task-item-title">${t.title}</div>
+        <div class="task-item-meta">
+          <span class="task-item-subj">${t.subject}</span>
+          <span class="priority-badge priority-${t.priority}">${t.priority === 'high' ? 'Alta' : t.priority === 'mid' ? 'Média' : 'Baixa'}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          ${status !== 'todo' ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="moveTask(${t.id},'prev')">← Voltar</button>` : ''}
+          ${status !== 'done' ? `<button class="btn btn-primary" style="padding:4px 10px;font-size:11px" onclick="moveTask(${t.id},'next')">Avançar →</button>` : ''}
+          <button class="delete-btn" onclick="deleteTask(${t.id})" style="margin-left:auto">✕</button>
+        </div>
+      </div>
+    `).join('') || '<div style="color:var(--text3);font-size:12px;padding:10px;text-align:center">Vazio</div>';
+  });
+  updateBadges();
+}
+
+function moveTask(id, dir) {
+  const order = ['todo','doing','done'];
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  const idx = order.indexOf(task.status);
+  if (dir === 'next' && idx < 2) task.status = order[idx+1];
+  if (dir === 'prev' && idx > 0) task.status = order[idx-1];
+  saveData(); renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveData(); renderTasks();
+  showToast('🗑️ Tarefa removida');
+}
+
+function showAddTaskModal() { document.getElementById('modal-task').style.display = 'flex'; }
+
+function addTask() {
+  const title = document.getElementById('task-title-input').value.trim();
+  const subject = document.getElementById('task-subject-input').value;
+  const priority = document.getElementById('task-priority-input').value;
+  if (!title) { showToast('⚠️ Digite o título da tarefa'); return; }
+  tasks.push({ id: Date.now(), title, subject, priority, status: 'todo' });
+  saveData(); closeModal('modal-task'); renderTasks();
+  showToast('✅ Tarefa criada!');
+  document.getElementById('task-title-input').value = '';
+}
+
+function setPreset(minutes, btn) {
+  if (timerRunning) return;
+  timerSeconds = minutes * 60; timerTotal = minutes * 60;
+  updateTimerDisplay();
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('play-btn').textContent = '▶';
+  } else {
+    timerRunning = true;
+    document.getElementById('play-btn').textContent = '⏸';
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimerDisplay();
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval); timerRunning = false;
+        document.getElementById('play-btn').textContent = '▶';
+        if (!isBreak) {
+          pomodoroCount = Math.min(pomodoroCount + 1, 4); updatePomos();
+          isBreak = true; timerSeconds = 5 * 60; timerTotal = 5 * 60;
+          document.getElementById('timer-mode-label').textContent = 'PAUSA';
+          showToast('🎉 Sessão concluída! Pausa de 5 min');
+        } else {
+          isBreak = false; timerSeconds = 25 * 60; timerTotal = 25 * 60;
+          document.getElementById('timer-mode-label').textContent = 'FOCO';
+          showToast('⏱️ Hora de focar!');
+        }
+        updateTimerDisplay();
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval); timerRunning = false; isBreak = false;
+  timerSeconds = timerTotal;
+  document.getElementById('play-btn').textContent = '▶';
+  document.getElementById('timer-mode-label').textContent = 'FOCO';
+  updateTimerDisplay();
+}
+
+function skipSession() {
+  clearInterval(timerInterval); timerRunning = false;
+  document.getElementById('play-btn').textContent = '▶';
+  if (!isBreak) {
+    pomodoroCount = Math.min(pomodoroCount + 1, 4); updatePomos();
+    isBreak = true; timerSeconds = 5 * 60; timerTotal = 5 * 60;
+    document.getElementById('timer-mode-label').textContent = 'PAUSA';
+  } else {
+    isBreak = false; timerSeconds = 25 * 60; timerTotal = 25 * 60;
+    document.getElementById('timer-mode-label').textContent = 'FOCO';
+  }
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const circ = 741.4;
+  const offset = circ * (1 - timerSeconds / timerTotal);
+  document.getElementById('timer-ring').style.strokeDashoffset = circ - offset;
+}
+
+function updatePomos() {
+  for (let i = 1; i <= 4; i++) document.getElementById('p'+i).classList.toggle('done', i <= pomodoroCount);
+}
+
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+  if (!notes.length) { list.innerHTML = '<div class="no-events" style="padding:24px"><div class="icon">📝</div>Nenhuma nota ainda</div>'; return; }
+  list.innerHTML = notes.map(n => `
+    <div class="note-list-item ${n.id === currentNoteId ? 'active' : ''}" onclick="openNote(${n.id})">
+      <div class="note-list-title">${n.title || 'Sem título'}</div>
+      <div class="note-list-preview">${n.body || 'Vazio...'}</div>
+      <div class="note-list-date">${n.date}</div>
+    </div>
+  `).join('');
+}
+
+function newNote() {
+  const note = { id: Date.now(), title: '', body: '', date: new Date().toLocaleDateString('pt-BR') };
+  notes.unshift(note); currentNoteId = note.id;
+  saveData(); renderNotes();
+  document.getElementById('note-title').value = '';
+  document.getElementById('note-body').value = '';
+  document.getElementById('note-title').focus();
+}
+
+function openNote(id) {
+  currentNoteId = id;
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('note-body').value = note.body;
+  renderNotes();
+}
+
+function saveCurrentNote() {
+  if (!currentNoteId) return;
+  const note = notes.find(n => n.id === currentNoteId);
+  if (!note) return;
+  note.title = document.getElementById('note-title').value;
+  note.body = document.getElementById('note-body').value;
+  saveData(); renderNotes();
+}
+
+function deleteCurrentNote() {
+  if (!currentNoteId) return;
+  notes = notes.filter(n => n.id !== currentNoteId);
+  currentNoteId = null;
+  document.getElementById('note-title').value = '';
+  document.getElementById('note-body').value = '';
+  saveData(); renderNotes();
+  showToast('🗑️ Nota removida');
+}
+
+function renderDashboard() { updateDashboard(); }
+
+function updateDashboard() {
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date)).slice(0,5);
+  document.getElementById('dash-events').textContent = events.length;
+  document.getElementById('dash-tasks').textContent = tasks.filter(t => t.status !== 'done').length;
+  const container = document.getElementById('upcoming-events-list');
+  if (!upcoming.length) { container.innerHTML = '<div class="no-events"><div class="icon">🗓️</div>Nenhum evento agendado. Vá ao Calendário para agendar seus estudos!</div>'; return; }
+  container.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">` + upcoming.map(ev => {
+    const [y,m,d] = ev.date.split('-');
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div class="event-dot ${ev.type}"></div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${ev.topic}</div><div style="font-size:11px;color:var(--text3)">${ev.subject} · ${d}/${m}/${y} às ${ev.time}</div></div>
+      <span class="event-tag ${ev.type}">${ev.type === 'study' ? '📖 Estudo' : '🔄 Revisão'}</span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function updateBadges() {
+  document.getElementById('cal-badge').textContent = events.length;
+  document.getElementById('task-badge').textContent = tasks.filter(t => t.status !== 'done').length;
+}
+
+function saveData() {
+  localStorage.setItem('studium_events', JSON.stringify(events));
+  localStorage.setItem('studium_tasks', JSON.stringify(tasks));
+  localStorage.setItem('studium_subjects', JSON.stringify(subjects));
+  localStorage.setItem('studium_notes', JSON.stringify(notes));
+}
+
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+initCalendar();
+syncSubjectSelects();
+updateBadges();
+updateDashboard();
+updateTimerDisplay();
+
+const telegramChatInput = document.getElementById('telegram-chat-id');
+const telegramLeadInput = document.getElementById('telegram-lead-minutes');
+if (telegramChatInput) telegramChatInput.value = telegramChatId;
+if (telegramLeadInput) telegramLeadInput.value = String(reminderLeadMinutes);
+
+checkTelegramReminders();
+setInterval(checkTelegramReminders, 60000);
+</script>
+</body>
+</html>
